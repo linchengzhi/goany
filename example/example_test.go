@@ -2,7 +2,7 @@ package example
 
 import (
 	"fmt"
-	"goany"
+	"github.com/linchengzhi/goany"
 	"reflect"
 	"testing"
 	"time"
@@ -55,7 +55,7 @@ func TestToAny_Example(t *testing.T) {
 	fmt.Println(p1, err) //{1, John 20} nil
 }
 
-func TestName(t *testing.T) {
+func TestToAny_Hook(t *testing.T) {
 	type A struct {
 		Name string `json:"name"`
 	}
