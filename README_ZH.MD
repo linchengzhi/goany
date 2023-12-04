@@ -1,4 +1,4 @@
-# [English](https://github.com/linchengzhi/goany/REREAD.MD) | [中文](https://github.com/linchengzhi/goany/README_ZH.MD)
+# [English](https://github.com/linchengzhi/goany) | [中文](https://github.com/linchengzhi/goany/blob/main/README_ZH.MD)
 # GoAny: Go 语言的强大类型转换库
 
 `GoAny` 是一个多功能的 Go 语言库，提供了一种方式将不同的数据类型（如基础类型、列表、映射、结构体等）转换为指定的目标类型。这个工具使用反射动态处理类型转换，使其成为各种 Go 应用程序的灵活工具。
@@ -240,4 +240,4 @@ GoAny 支持以下转换：
 欢迎贡献以改进 ToAny！请随时向仓库提交问题和拉取请求。
 
 ## License
-GoAny 采用 MIT 许可证授权。详细信息请查看 [LICENSE](https://github.com/linchengzhi/goany/LICENSE) 文件。
+GoAny 采用 MIT 许可证授权。详细信息请查看 [LICENSE](https://github.com/linchengzhi/goany/blob/main/LICENSE) 文件。

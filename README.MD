@@ -1,4 +1,4 @@
-# [English](https://github.com/linchengzhi/goany/REREAD.MD) | [中文](https://github.com/linchengzhi/goany/README_ZH.MD)
+# [English](https://github.com/linchengzhi/goany) | [中文](https://github.com/linchengzhi/goany/blob/main/README_ZH.MD)
 
 # GoAny: A Powerful Type Conversion Library for Go
 
@@ -243,4 +243,4 @@ GoAny supports the following conversions:
 Contributions to improve ToAny are welcome! Please feel free to submit issues and pull requests to the repository.
 
 ## License
-GoAny is licensed under the MIT license. See the [LICENSE](https://github.com/linchengzhi/goany/LICENSE) file for details.
+GoAny is licensed under the MIT license. See the [LICENSE](https://github.com/linchengzhi/goany/blob/main/LICENSE) file for details.
