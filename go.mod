@@ -1,4 +1,4 @@
-module goany
+module github.com/linchengzhi/goany
 
 go 1.21.1
 
