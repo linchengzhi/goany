@@ -24,9 +24,9 @@ var (
 		time.StampMilli,
 		time.StampMicro,
 		time.StampNano,
-		time.DateTime, //2006-01-02 15:04:05
-		time.DateOnly,
-		time.TimeOnly,
+		"2006-01-02 15:04:05",
+		"2006-01-02",
+		"15:04:05",
 		"2006/01/02 15:04:05",
 		"2006-01-02T15:04:05",
 	}

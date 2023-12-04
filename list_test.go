@@ -143,7 +143,7 @@ func TestToList_String(t *testing.T) {
 			input:    ``,
 			output:   []string{},
 			expected: []string{},
-			err:      ErrNotJson,
+			err:      errors.Errorf(ErrNotJson, ``),
 		},
 		{
 			name:     "Test string map to slice",

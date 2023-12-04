@@ -1,6 +1,6 @@
 module github.com/linchengzhi/goany
 
-go 1.8
+go 1.7
 
 require (
 	github.com/pkg/errors v0.9.1

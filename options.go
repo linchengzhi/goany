@@ -8,10 +8,10 @@ import (
 
 var (
 	ErrDecodeStop           = errors.New("decode stop")
-	ErrBasic                = "unable to convert %#v to "
-	ErrInToOut              = "unable to convert %#v to %s"
+	ErrBasic                = "unable to convert %#v(type %[1]T) to "
+	ErrInToOut              = "unable to convert %#v(type %[1]T) to %s"
 	ErrFieldNoFound         = "the specified field was not found key: %s"
-	ErrUnSupportType        = "un support out type %v"
+	ErrUnSupportType        = "unsupported out type %v"
 	ErrUnableConvertBasic   = ErrBasic + "basic type"
 	ErrUnableConvertInt64   = ErrBasic + "int64"
 	ErrUnableConvertUint64  = ErrBasic + "uint64"
@@ -19,7 +19,7 @@ var (
 	ErrUnableConvertString  = ErrBasic + "string"
 	ErrUnableConvertBool    = ErrBasic + "bool"
 	ErrUnableConvertTime    = ErrBasic + "time"
-	ErrNotJson              = errors.New("the input is not json")
+	ErrNotJson              = "the input %#v(type %[1]T) is not json, or not map or slice"
 	ErrInNotPtr             = errors.New("if want to export a unexported field, the input must be of pointer type")
 )
 

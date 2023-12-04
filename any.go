@@ -174,14 +174,26 @@ func (cli *anyClient) decodePtr(in interface{}, outVal reflect.Value) error {
 }
 
 func (cli *anyClient) stringToAny(in interface{}, outVal reflect.Value) error {
+	inBytes := []byte(reflect.ValueOf(in).String())
+	// check if the in is valid json
+	if !json.Valid(inBytes) {
+		return errors.Errorf(ErrNotJson, in)
+	}
 	var inData interface{}
-	dec := json.NewDecoder(bytes.NewBuffer([]byte(in.(string))))
+	dec := json.NewDecoder(bytes.NewBuffer(inBytes))
 	dec.UseNumber()
 	err := dec.Decode(&inData)
 	if err != nil {
-		return ErrNotJson
+		return errors.Errorf(ErrNotJson, in)
 	}
-	return cli.decodeAny(inData, outVal)
+
+	inDataType, _ := ReflectTypeValue(inData)
+	switch inDataType.Kind() {
+	case reflect.Map, reflect.Slice:
+		return cli.decodeAny(inData, outVal)
+	default:
+		return errors.Errorf(ErrNotJson, in) // reject other types
+	}
 }
 
 // isBasicType returns true if the type is a basic type.
