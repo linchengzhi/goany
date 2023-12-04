@@ -1,0 +1,49 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
+
+# Project-local .vscode directory
+.vscode/
+
+# Golang specific - You can safely remove the rest if you don't use Go
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+bin/
+# Add output of the go coverage tool, specifically when used with LiteIDE
+*.out
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Ignore the go.mod and go.sum files if using Go modules
+# Comment out if these files should be in version control
+#go.mod
+#go.sum
+
+# Ignore .env files containing potentially sensitive information
+.env
+
+# Ignore IDE and editor files
+.idea/
+*.swp
+*.swo
+*.sublime*
+*.vscode/
+*.DS_Store
+
+# Ignore build output directories
+dist
+build
+obj
