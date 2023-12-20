@@ -383,3 +383,98 @@ func TestHook_2(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "a_test", b.Name)
 }
+
+func TestDecodeStruct_Anon(t *testing.T) {
+	type Account struct {
+		id int
+	}
+	type Player struct {
+		Name string
+		age  int
+	}
+	type PlayerAccount struct {
+		Account
+		Name string
+		age  int
+	}
+	type Anon struct {
+		Player
+		Num int
+		day int
+	}
+	type Players []*Player
+	type AnonWithPtr struct {
+		*Account
+		*Player
+		Num int
+		day int
+	}
+	type AnonWithSlice struct {
+		Players
+		Num int
+		day int
+	}
+	type AnonWithSlicePtr struct {
+		*Players
+		Num int
+		day int
+	}
+	type AnonTwoTier struct {
+		PlayerAccount
+		Num int
+		day int
+	}
+
+	tests := []structTest{
+		{
+			name:     "Test with anon",
+			input:    &Anon{Num: 1, day: 2, Player: Player{Name: "a", age: 3}},
+			output:   new(Anon),
+			expected: &Anon{Num: 1, day: 2, Player: Player{Name: "a", age: 3}},
+		},
+		{
+			name:     "Test with anon ptr",
+			input:    &AnonWithPtr{Num: 1, day: 2, Player: &Player{Name: "a", age: 3}},
+			output:   new(AnonWithPtr),
+			expected: &AnonWithPtr{Num: 1, day: 2, Player: &Player{Name: "a", age: 3}},
+		},
+		{
+			name:     "Test with anon slice",
+			input:    &AnonWithSlice{Num: 1, day: 2, Players: []*Player{{Name: "a", age: 3}}},
+			output:   new(AnonWithSlice),
+			expected: &AnonWithSlice{Num: 1, day: 2, Players: []*Player{{Name: "a", age: 3}}},
+		},
+		{
+			name:     "Test with anon slice ptr",
+			input:    &AnonWithSlicePtr{Num: 1, day: 2, Players: &Players{{Name: "a", age: 3}}},
+			output:   new(AnonWithSlicePtr),
+			expected: &AnonWithSlicePtr{Num: 1, day: 2, Players: &Players{{Name: "a", age: 3}}},
+		},
+		{
+			name:     "Test with anon two tier",
+			input:    &AnonTwoTier{Num: 1, day: 2, PlayerAccount: PlayerAccount{Name: "a", age: 3, Account: Account{id: 4}}},
+			output:   new(AnonTwoTier),
+			expected: &AnonTwoTier{Num: 1, day: 2, PlayerAccount: PlayerAccount{Name: "a", age: 3, Account: Account{id: 4}}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var result = tt.output
+			if result == nil {
+				result = make(map[string]interface{})
+			}
+			if tt.op == nil {
+				tt.op = NewOptions().SetExportedUnExported(true)
+			}
+			var err error
+			err = ToAny(tt.input, &result, *tt.op)
+			if tt.err != nil {
+				assert.Equal(t, err.Error(), tt.err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
+			}
+		})
+	}
+}

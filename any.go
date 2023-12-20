@@ -3,10 +3,12 @@ package goany
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/bytedance/sonic"
 	"github.com/pkg/errors"
 	"reflect"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 // IAny defines an interface for converting various types to the 'any' type.
@@ -147,7 +149,7 @@ func (cli *anyClient) decodeInterface(in interface{}, outVal reflect.Value) erro
 		if !inVal.Type().AssignableTo(outVal.Type()) {
 			return errors.Errorf(ErrInToOut, in, "interface")
 		}
-		outVal.Set(inVal)
+		reflect.NewAt(outVal.Type(), unsafe.Pointer(outVal.UnsafeAddr())).Elem().Set(inVal)
 	}
 	return nil
 }
@@ -180,11 +182,11 @@ func (cli *anyClient) stringToAny(in interface{}, outVal reflect.Value) error {
 		return errors.Errorf(ErrNotJson, in)
 	}
 	var inData interface{}
-	dec := json.NewDecoder(bytes.NewBuffer(inBytes))
-	dec.UseNumber()
+	dec := sonic.ConfigDefault.NewDecoder(bytes.NewBuffer(inBytes))
 	err := dec.Decode(&inData)
-	if err != nil {
-		return errors.Errorf(ErrNotJson, in)
+	if err != nil || inData == nil {
+		//return errors.Errorf(ErrNotJson, in)
+		return nil // if not json, return nil, skip match
 	}
 
 	inDataType, _ := ReflectTypeValue(inData)
@@ -264,4 +266,12 @@ func GetFieldNameByTag(field reflect.StructField, tag string) string {
 		fieldName = field.Name
 	}
 	return fieldName
+}
+
+func indirectValue(reflectType reflect.Value) (_ reflect.Value, isPtr bool) {
+	for reflectType.Kind() == reflect.Ptr {
+		reflectType = reflectType.Elem()
+		isPtr = true
+	}
+	return reflectType, isPtr
 }

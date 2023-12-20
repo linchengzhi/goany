@@ -65,23 +65,22 @@ func (cli *anyClient) structToMap(in interface{}, outVal reflect.Value) error {
 	inType, inValue := ReflectTypeValue(in)
 
 	for i := 0; i < inType.NumField(); i++ {
-		inField := inType.Field(i)
-		if inField.PkgPath != "" && !cli.options.exportedUnExported { //unexported
-			continue
-		}
+		inField := new(fieldInfo)
+		inField.fieldStruct = inType.Field(i)
+
 		currentKey := reflect.Indirect(reflect.New(basicOutKey))
 		currentValue := reflect.Indirect(reflect.New(basicOutElem))
-		fileName := GetFieldNameByTag(inField, cli.options.tagName)
-		if fileName == TagIgnore {
+		inField.fieldName = GetFieldNameByTag(inField.fieldStruct, cli.options.tagName)
+		if !inField.canUse(*cli.options) {
 			continue
 		}
 
-		if err := cli.decodeAny(fileName, currentKey); err != nil {
+		if err := cli.decodeAny(inField.fieldName, currentKey); err != nil {
 			return err
 		}
 
 		inFieldVal := inValue.Field(i)
-		if inField.PkgPath != "" { //if inField is unexported, it must be accessible via a pointer
+		if inField.fieldStruct.PkgPath != "" { //if inField is unexported, it must be accessible via a pointer
 			if !inFieldVal.CanAddr() {
 				return ErrInNotPtr
 			}

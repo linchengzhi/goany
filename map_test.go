@@ -2,7 +2,6 @@ package goany
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -293,11 +292,9 @@ func TestDecodeMap_String(t *testing.T) {
 	}
 }
 
-func TestName(t *testing.T) {
+func TestDecodeMap_List2(t *testing.T) {
 	var ints = []string{"1", "2", "3"}
 	var m = make([]map[int]int, 0)
 	err := ToAny(ints, &m)
-	if err != nil {
-		fmt.Println(err)
-	}
+	assert.Error(t, err)
 }
