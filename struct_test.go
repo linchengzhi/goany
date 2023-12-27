@@ -48,6 +48,12 @@ func TestDecodeStruct_Map(t *testing.T) {
 		Name string `bson:"bson_name" json:"name"`
 	}
 
+	type player2 struct {
+		Id    int    `gorm:"column:gorm_id" json:"id"`
+		Name  string `bson:"bson_name" json:"name"`
+		Name2 string `bson:"bson_name2" json:"name2"`
+	}
+
 	type AnonData struct {
 		Name string `json:"name"`
 		Age  int    `json:"age"`
@@ -117,6 +123,13 @@ func TestDecodeStruct_Map(t *testing.T) {
 			output:   new(accountWithUnEx),
 			op:       NewOptions().SetExportedUnExported(true),
 			expected: &accountWithUnEx{name: "a", anonymousNoExport: anonymousNoExport{age: 1}},
+		},
+		{
+			name:     "Test with map, assign key",
+			input:    map[string]interface{}{"name": "a"},
+			output:   new(player2),
+			op:       NewOptions().SetAssignKey(map[string]string{"name": "name2"}),
+			expected: &player2{Name: "a", Name2: "a"},
 		},
 	}
 

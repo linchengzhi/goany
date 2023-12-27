@@ -43,19 +43,21 @@ func (cli *anyClient) mapToStruct(in interface{}, outVal reflect.Value) error {
 	for _, inFieldInfo := range inFieldInfos {
 
 		// Skip the field if the input map key does not have a corresponding field in the output struct
-		outFieldInfo := matchOutField(inFieldInfo.fieldName, outFieldInfos, cli.options.assignKey)
-		if outFieldInfo == nil {
-			continue
-		}
+		matchOuts := matchOutField(inFieldInfo.fieldName, outFieldInfos, cli.options.assignKey)
+		for _, outFieldInfo := range matchOuts {
+			if outFieldInfo == nil {
+				continue
+			}
 
-		if err := cli.decodeAny(inFieldInfo.fieldVal.Interface(), outFieldInfo.fieldVal); err != nil {
-			return err
-		}
-		// Remove the field from the map of output fields to avoid multiple assignments.
-		delete(outFieldInfos, outFieldInfo.fieldName)
+			if err := cli.decodeAny(inFieldInfo.fieldVal.Interface(), outFieldInfo.fieldVal); err != nil {
+				return err
+			}
+			// Remove the field from the map of output fields to avoid multiple assignments.
+			delete(outFieldInfos, outFieldInfo.fieldName)
 
-		for _, anon := range outAnonymous[outFieldInfo.fieldName] {
-			delete(outFieldInfos, anon)
+			for _, anon := range outAnonymous[outFieldInfo.fieldName] {
+				delete(outFieldInfos, anon)
+			}
 		}
 	}
 	//if outfield not match, set it to nil
@@ -89,20 +91,19 @@ func (cli *anyClient) structToStruct(in interface{}, outVal reflect.Value) error
 		}
 
 		// If no matching field is found, skip to the next field.
-		outFieldInfo := matchOutField(inFieldInfo.fieldName, outFieldInfos, cli.options.assignKey)
-		if outFieldInfo == nil {
-			continue
-		}
-		if err := cli.decodeAny(inFieldInfo.fieldVal.Interface(), outFieldInfo.fieldVal); err != nil {
-			return err
-		}
+		matchOuts := matchOutField(inFieldInfo.fieldName, outFieldInfos, cli.options.assignKey)
+		for _, outFieldInfo := range matchOuts {
+			if err := cli.decodeAny(inFieldInfo.fieldVal.Interface(), outFieldInfo.fieldVal); err != nil {
+				return err
+			}
 
-		// Remove the field from the map of output fields to avoid multiple assignments.
-		delete(outFieldInfos, outFieldInfo.fieldName)
+			// Remove the field from the map of output fields to avoid multiple assignments.
+			delete(outFieldInfos, outFieldInfo.fieldName)
 
-		// Also, remove any Anonymous associated with the field.
-		for _, anon := range outAnonymous[outFieldInfo.fieldName] {
-			delete(outFieldInfos, anon)
+			// Also, remove any Anonymous associated with the field.
+			for _, anon := range outAnonymous[outFieldInfo.fieldName] {
+				delete(outFieldInfos, anon)
+			}
 		}
 
 		// If the current field is an anonymous struct, set it as currentAnonymous.
@@ -125,20 +126,20 @@ func (cli *anyClient) structToStruct(in interface{}, outVal reflect.Value) error
 // matchOutField attempts to find a field in the output struct that matches the input field name.
 // It takes into consideration any custom assignKey mappings that may be used to match fields
 // with different names between the input and output.
-func matchOutField(inKey string, outKeys map[string]fieldInfo, assignKey map[string]string) *fieldInfo {
+func matchOutField(inKey string, outKeys map[string]fieldInfo, assignKey map[string]string) []*fieldInfo {
 	// Check if there is a direct match for the input key in the output keys.
+	var list = make([]*fieldInfo, 0)
 	if out, ok := outKeys[inKey]; ok {
-		return &out
+		list = append(list, &out)
 	}
 
 	// Check if there is an assignKey mapping for the input key and if it matches an output key.
 	if key, ok := assignKey[inKey]; ok {
 		if out, ok := outKeys[key]; ok {
-			return &out
+			list = append(list, &out)
 		}
 	}
-
-	return nil
+	return list
 }
 
 // get unexported field value
