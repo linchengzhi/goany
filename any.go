@@ -177,6 +177,9 @@ func (cli *anyClient) decodePtr(in interface{}, outVal reflect.Value) error {
 
 func (cli *anyClient) stringToAny(in interface{}, outVal reflect.Value) error {
 	inBytes := []byte(reflect.ValueOf(in).String())
+	if string(inBytes) == "" { //if in is empty, return nil
+		return nil
+	}
 	// check if the in is valid json
 	if !json.Valid(inBytes) {
 		return errors.Errorf(ErrNotJson, in)

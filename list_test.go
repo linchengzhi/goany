@@ -142,8 +142,8 @@ func TestToList_String(t *testing.T) {
 			name:     "Test nil to slice",
 			input:    ``,
 			output:   []string{},
-			expected: []string{},
-			err:      errors.Errorf(ErrNotJson, ``),
+			expected: []string(nil),
+			err:      nil,
 		},
 		{
 			name:     "Test string map to slice",
