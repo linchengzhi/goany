@@ -239,6 +239,19 @@ GoAny supports the following conversions:
   err := goany.ToAny(&a, &b, *goany.NewOptions().AddHook(hook))
   fmt.Println(b, err) //{a_test} <nil>
   ```
+- #### ignoreBasicTypeErr
+  If the ignoreBasicTypeErr value is true, the underlying type conversion failure in the struct is skipped and the default value is used.
+  ```go
+  type player struct {
+  	Name int `json:"name"`
+  	Id   int `json:"id"`
+  }
+  var in = map[string]interface{}{"id": 1, "name": "a"}
+  var out = player{}
+  op := NewOptions().SetIgnoreBasicTypeErr(true)
+  err := ToAny(in, &out, *op)
+  fmt.Println(out, err) //player{Id: 1, Name: 0}
+  ```    
 ## Contributing
 Contributions to improve ToAny are welcome! Please feel free to submit issues and pull requests to the repository.
 

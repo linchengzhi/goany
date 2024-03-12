@@ -2,6 +2,7 @@ package goany
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
@@ -160,6 +161,10 @@ func TestDecodeStruct_Struct(t *testing.T) {
 		Name string `bson:"bson_name" json:"name"`
 	}
 
+	type playerIgnore struct {
+		Name int `json:"name"`
+	}
+
 	type anonymousData struct {
 		Name string `json:"name"`
 		Age  int    `json:"age"`
@@ -265,6 +270,13 @@ func TestDecodeStruct_Struct(t *testing.T) {
 			output:   new(AnonymousInterface),
 			op:       NewOptions().SetExportedUnExported(true),
 			expected: &AnonymousInterface{name: "a"},
+		},
+		{
+			name:     "Test with struct ignore basic type err",
+			input:    &player{Name: "abc"},
+			output:   new(playerIgnore),
+			op:       NewOptions().SetIgnoreBasicTypeErr(true),
+			expected: &playerIgnore{},
 		},
 	}
 
@@ -490,4 +502,16 @@ func TestDecodeStruct_Anon(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestName(t *testing.T) {
+	type player struct {
+		Name int `json:"name"`
+		Id   int `json:"id"`
+	}
+	var in = map[string]interface{}{"id": 1, "name": "a"}
+	var out = player{}
+	op := NewOptions().SetIgnoreBasicTypeErr(true)
+	err := ToAny(in, &out, *op)
+	fmt.Println(out, err) //player{Id: 1, Name: 0}
 }

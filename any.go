@@ -85,6 +85,9 @@ func (cli *anyClient) decodeAny(in interface{}, outVal reflect.Value) error {
 	switch {
 	case isBasicType(outKind):
 		err = cli.decodeBasic(in, outVal)
+		if cli.options.ignoreBasicTypeErr {
+			err = nil
+		}
 	case outKind == reflect.Interface:
 		err = cli.decodeInterface(in, outVal)
 	case outKind == reflect.Map:

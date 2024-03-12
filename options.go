@@ -53,6 +53,8 @@ type Options struct {
 
 	assignKey map[string]string //assign key
 
+	ignoreBasicTypeErr bool // Ignore base type error
+
 	hooks []HookFunc //customize the parsing
 }
 
@@ -102,6 +104,11 @@ func (op *Options) SetStructToMapDetail(v bool) *Options {
 
 func (op *Options) SetAssignKey(v map[string]string) *Options {
 	op.assignKey = v
+	return op
+}
+
+func (op *Options) SetIgnoreBasicTypeErr(b bool) *Options {
+	op.ignoreBasicTypeErr = b
 	return op
 }
 
