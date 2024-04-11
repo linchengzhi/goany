@@ -40,35 +40,3 @@ func TestReflectTypeValue(t *testing.T) {
 		}
 	})
 }
-
-func TestGetFieldNameByTag(t *testing.T) {
-	type Test struct {
-		Name string `json:"name" gorm:"column:name"`
-		Age  int    `json:"age" gorm:"column:age"`
-	}
-	tt := Test{Name: "Test", Age: 10}
-
-	t.Run("json tag", func(t *testing.T) {
-		field, _ := reflect.TypeOf(tt).FieldByName("Name")
-		if GetFieldNameByTag(field, "json") != "name" {
-			t.Errorf("Expected 'name', but got %v", GetFieldNameByTag(field, "json"))
-		}
-
-		field, _ = reflect.TypeOf(tt).FieldByName("Age")
-		if GetFieldNameByTag(field, "json") != "age" {
-			t.Errorf("Expected 'age', but got %v", GetFieldNameByTag(field, "json"))
-		}
-	})
-
-	t.Run("gorm tag", func(t *testing.T) {
-		field, _ := reflect.TypeOf(tt).FieldByName("Name")
-		if GetFieldNameByTag(field, "gorm") != "name" {
-			t.Errorf("Expected 'name', but got %v", GetFieldNameByTag(field, "gorm"))
-		}
-
-		field, _ = reflect.TypeOf(tt).FieldByName("Age")
-		if GetFieldNameByTag(field, "gorm") != "age" {
-			t.Errorf("Expected 'age', but got %v", GetFieldNameByTag(field, "gorm"))
-		}
-	})
-}

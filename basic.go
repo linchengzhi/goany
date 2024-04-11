@@ -1,12 +1,13 @@
 package goany
 
 import (
-	"encoding/json"
-	"github.com/pkg/errors"
 	"reflect"
 	"strconv"
 	"time"
 	"unsafe"
+
+	"github.com/bytedance/sonic"
+	"github.com/pkg/errors"
 )
 
 // supported basic type
@@ -18,27 +19,27 @@ import (
 
 // ToInt64 convert an interface to an int64 type.
 func ToInt64(v interface{}) int64 {
-	out, _ := toInt64E(v)
+	out, _ := toInt64E(v, *NewOptions())
 	return out
 }
 
 func ToInt32(v interface{}) int32 {
-	out, _ := toInt64E(v)
+	out, _ := toInt64E(v, *NewOptions())
 	return int32(out)
 }
 
 func ToInt16(v interface{}) int16 {
-	out, _ := toInt64E(v)
+	out, _ := toInt64E(v, *NewOptions())
 	return int16(out)
 }
 
 func ToInt8(v interface{}) int8 {
-	out, _ := toInt64E(v)
+	out, _ := toInt64E(v, *NewOptions())
 	return int8(out)
 }
 
 func ToInt(v interface{}) int {
-	out, _ := toInt64E(v)
+	out, _ := toInt64E(v, *NewOptions())
 	return int(out)
 }
 
@@ -51,27 +52,27 @@ func ToInt64E(v interface{}, op ...Options) (int64, error) {
 }
 
 func ToUint64(v interface{}) uint64 {
-	out, _ := toUint64E(v)
+	out, _ := toUint64E(v, *NewOptions())
 	return out
 }
 
 func ToUint32(v interface{}) uint32 {
-	out, _ := toUint64E(v)
+	out, _ := toUint64E(v, *NewOptions())
 	return uint32(out)
 }
 
 func ToUint16(v interface{}) uint16 {
-	out, _ := toUint64E(v)
+	out, _ := toUint64E(v, *NewOptions())
 	return uint16(out)
 }
 
 func ToUint8(v interface{}) uint8 {
-	out, _ := toUint64E(v)
+	out, _ := toUint64E(v, *NewOptions())
 	return uint8(out)
 }
 
 func ToUint(v interface{}) uint {
-	out, _ := toUint64E(v)
+	out, _ := toUint64E(v, *NewOptions())
 	return uint(out)
 }
 
@@ -84,13 +85,13 @@ func ToUint64E(v interface{}, op ...Options) (uint64, error) {
 
 // ToFloat32 convert an interface to a float32 type
 func ToFloat32(v interface{}) float32 {
-	out, _ := toFloat64E(v)
+	out, _ := toFloat64E(v, *NewOptions())
 	return float32(out)
 }
 
 // ToFloat64 convert an interface to a float64 type
 func ToFloat64(v interface{}) float64 {
-	out, _ := toFloat64E(v)
+	out, _ := toFloat64E(v, *NewOptions())
 	return out
 }
 
@@ -103,7 +104,7 @@ func ToFloat64E(v interface{}, op ...Options) (float64, error) {
 
 // ToString convert an interface to a string type
 func ToString(v interface{}) string {
-	out, _ := toStringE(v)
+	out, _ := toStringE(v, *NewOptions())
 	return out
 }
 
@@ -115,7 +116,7 @@ func ToStringE(v interface{}, op ...Options) (string, error) {
 }
 
 func ToBool(v interface{}) bool {
-	out, _ := toBoolE(v)
+	out, _ := toBoolE(v, *NewOptions())
 	return out
 }
 
@@ -137,19 +138,19 @@ func (cli *anyClient) decodeBasic(in interface{}, outVal reflect.Value) error {
 		}
 		reflect.NewAt(outVal.Type(), unsafe.Pointer(outVal.UnsafeAddr())).Elem().SetInt(result)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		result, err := toUint64E(in)
+		result, err := toUint64E(in, *cli.options)
 		if err != nil {
 			return err
 		}
 		reflect.NewAt(outVal.Type(), unsafe.Pointer(outVal.UnsafeAddr())).Elem().SetUint(result)
 	case reflect.Float32, reflect.Float64:
-		result, err := toFloat64E(in)
+		result, err := toFloat64E(in, *cli.options)
 		if err != nil {
 			return err
 		}
 		reflect.NewAt(outVal.Type(), unsafe.Pointer(outVal.UnsafeAddr())).Elem().SetFloat(result)
 	case reflect.Bool:
-		result, err := toBoolE(in)
+		result, err := toBoolE(in, *cli.options)
 		if err != nil {
 			return err
 		}
@@ -183,7 +184,7 @@ func (cli *anyClient) decodeBasic(in interface{}, outVal reflect.Value) error {
 // - Slice: If the slice is of type []uint8å (a byte slice), it converts the byte slice to a string and then uses strconv.ParseInt to convert the string to an int64. Otherwise, it returns an error.
 //
 // If the input is of any other type, the function returns an error.
-func toInt64E(v interface{}, op ...Options) (int64, error) {
+func toInt64E(v interface{}, op Options) (int64, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return 0, nil
@@ -223,7 +224,7 @@ func toInt64E(v interface{}, op ...Options) (int64, error) {
 }
 
 // toUint64E converts an interface to an uint64 type.
-func toUint64E(v interface{}, op ...Options) (uint64, error) {
+func toUint64E(v interface{}, op Options) (uint64, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return 0, nil
@@ -255,7 +256,7 @@ func toUint64E(v interface{}, op ...Options) (uint64, error) {
 }
 
 // toFloat64E converts an interface to a float64 type.
-func toFloat64E(v interface{}, op ...Options) (float64, error) {
+func toFloat64E(v interface{}, op Options) (float64, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return 0, nil
@@ -288,7 +289,7 @@ func toFloat64E(v interface{}, op ...Options) (float64, error) {
 }
 
 // toStringE converts an interface to a string type.
-func toStringE(v interface{}, op ...Options) (string, error) {
+func toStringE(v interface{}, op Options) (string, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return "", nil
@@ -310,20 +311,20 @@ func toStringE(v interface{}, op ...Options) (string, error) {
 	case reflect.Struct:
 		switch v.(type) {
 		case time.Time:
-			return v.(time.Time).Format(op[0].timeFormat), nil
+			return v.(time.Time).Format(op.timeFormat), nil
 		default:
-			b, err := json.Marshal(v)
+			b, err := sonic.Marshal(v)
 			return string(b), err
 		}
 	case reflect.Map:
-		b, err := json.Marshal(v)
+		b, err := sonic.Marshal(v)
 		return string(b), err
 	case reflect.Slice, reflect.Array:
 		switch v.(type) {
 		case []uint8:
 			return string(v.([]uint8)), nil
 		default:
-			b, err := json.Marshal(v)
+			b, err := sonic.Marshal(v)
 			return string(b), err
 		}
 	default:
@@ -332,7 +333,7 @@ func toStringE(v interface{}, op ...Options) (string, error) {
 }
 
 // toBoolE converts an interface to a bool type.
-func toBoolE(v interface{}, op ...Options) (bool, error) {
+func toBoolE(v interface{}, op Options) (bool, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return false, nil

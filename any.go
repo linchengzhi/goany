@@ -6,7 +6,6 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/pkg/errors"
 	"reflect"
-	"strings"
 	"time"
 	"unsafe"
 )
@@ -218,18 +217,6 @@ func isBasicType(v reflect.Kind) bool {
 	return true
 }
 
-// check in is nil
-func CheckInIsNil(in interface{}) bool {
-	var inVal reflect.Value
-	if in != nil {
-		inVal = reflect.ValueOf(in)
-		if inVal.Kind() == reflect.Ptr && inVal.IsNil() {
-			in = nil
-		}
-	}
-	return in == nil
-}
-
 // The Indirect function dereferences an interface{} value
 // until it reaches a non-pointer base value or a nil value.
 func Indirect(a interface{}) interface{} {
@@ -255,23 +242,6 @@ func ReflectTypeValue(source interface{}) (reflect.Type, reflect.Value) {
 		sourceRv = sourceRv.Elem()
 	}
 	return sourceRt, sourceRv
-}
-
-// GetFieldNameByTag returns the field name by tag.
-// if tag is gorm, get column name
-// if tag name is nil, get field name
-func GetFieldNameByTag(field reflect.StructField, tag string) string {
-	fieldName := field.Tag.Get(tag)
-	if tag == "gorm" && strings.Contains(fieldName, "column:") {
-		fieldName = strings.Split(fieldName, "column:")[1]
-	}
-	if strings.Contains(fieldName, ",") {
-		fieldName = strings.Split(fieldName, ",")[0]
-	}
-	if fieldName == "" { //no tag, get field name
-		fieldName = field.Name
-	}
-	return fieldName
 }
 
 func indirectValue(reflectType reflect.Value) (_ reflect.Value, isPtr bool) {
