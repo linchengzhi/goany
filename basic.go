@@ -1,6 +1,7 @@
 package goany
 
 import (
+	"math"
 	"reflect"
 	"strconv"
 	"time"
@@ -19,27 +20,27 @@ import (
 
 // ToInt64 convert an interface to an int64 type.
 func ToInt64(v interface{}) int64 {
-	out, _ := toInt64E(v, *NewOptions())
+	out, _ := toInt64E(v)
 	return out
 }
 
 func ToInt32(v interface{}) int32 {
-	out, _ := toInt64E(v, *NewOptions())
+	out, _ := toInt64E(v)
 	return int32(out)
 }
 
 func ToInt16(v interface{}) int16 {
-	out, _ := toInt64E(v, *NewOptions())
+	out, _ := toInt64E(v)
 	return int16(out)
 }
 
 func ToInt8(v interface{}) int8 {
-	out, _ := toInt64E(v, *NewOptions())
+	out, _ := toInt64E(v)
 	return int8(out)
 }
 
 func ToInt(v interface{}) int {
-	out, _ := toInt64E(v, *NewOptions())
+	out, _ := toInt64E(v)
 	return int(out)
 }
 
@@ -48,31 +49,31 @@ func ToInt64E(v interface{}, op ...Options) (int64, error) {
 	if len(op) == 0 {
 		op = append(op, *NewOptions())
 	}
-	return toInt64E(v, op[0])
+	return toInt64E(v)
 }
 
 func ToUint64(v interface{}) uint64 {
-	out, _ := toUint64E(v, *NewOptions())
+	out, _ := toUint64E(v)
 	return out
 }
 
 func ToUint32(v interface{}) uint32 {
-	out, _ := toUint64E(v, *NewOptions())
+	out, _ := toUint64E(v)
 	return uint32(out)
 }
 
 func ToUint16(v interface{}) uint16 {
-	out, _ := toUint64E(v, *NewOptions())
+	out, _ := toUint64E(v)
 	return uint16(out)
 }
 
 func ToUint8(v interface{}) uint8 {
-	out, _ := toUint64E(v, *NewOptions())
+	out, _ := toUint64E(v)
 	return uint8(out)
 }
 
 func ToUint(v interface{}) uint {
-	out, _ := toUint64E(v, *NewOptions())
+	out, _ := toUint64E(v)
 	return uint(out)
 }
 
@@ -80,18 +81,18 @@ func ToUint64E(v interface{}, op ...Options) (uint64, error) {
 	if len(op) == 0 {
 		op = append(op, *NewOptions())
 	}
-	return toUint64E(v, op[0])
+	return toUint64E(v)
 }
 
 // ToFloat32 convert an interface to a float32 type
 func ToFloat32(v interface{}) float32 {
-	out, _ := toFloat64E(v, *NewOptions())
+	out, _ := toFloat64E(v)
 	return float32(out)
 }
 
 // ToFloat64 convert an interface to a float64 type
 func ToFloat64(v interface{}) float64 {
-	out, _ := toFloat64E(v, *NewOptions())
+	out, _ := toFloat64E(v)
 	return out
 }
 
@@ -99,7 +100,7 @@ func ToFloat64E(v interface{}, op ...Options) (float64, error) {
 	if len(op) == 0 {
 		op = append(op, *NewOptions())
 	}
-	return toFloat64E(v, op[0])
+	return toFloat64E(v)
 }
 
 // ToString convert an interface to a string type
@@ -116,7 +117,7 @@ func ToStringE(v interface{}, op ...Options) (string, error) {
 }
 
 func ToBool(v interface{}) bool {
-	out, _ := toBoolE(v, *NewOptions())
+	out, _ := toBoolE(v)
 	return out
 }
 
@@ -125,32 +126,32 @@ func ToBoolE(v interface{}, op ...Options) (bool, error) {
 	if len(op) == 0 {
 		op = append(op, *NewOptions())
 	}
-	return toBoolE(v, op[0])
+	return toBoolE(v)
 }
 
 // decodeBasic is a function that attempts to convert an arbitrary type to a basic type.
 func (cli *anyClient) decodeBasic(in interface{}, outVal reflect.Value) error {
 	switch outVal.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		result, err := toInt64E(in, *cli.options)
+		result, err := toInt64E(in)
 		if err != nil {
 			return err
 		}
 		reflect.NewAt(outVal.Type(), unsafe.Pointer(outVal.UnsafeAddr())).Elem().SetInt(result)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		result, err := toUint64E(in, *cli.options)
+		result, err := toUint64E(in)
 		if err != nil {
 			return err
 		}
 		reflect.NewAt(outVal.Type(), unsafe.Pointer(outVal.UnsafeAddr())).Elem().SetUint(result)
 	case reflect.Float32, reflect.Float64:
-		result, err := toFloat64E(in, *cli.options)
+		result, err := toFloat64E(in)
 		if err != nil {
 			return err
 		}
 		reflect.NewAt(outVal.Type(), unsafe.Pointer(outVal.UnsafeAddr())).Elem().SetFloat(result)
 	case reflect.Bool:
-		result, err := toBoolE(in, *cli.options)
+		result, err := toBoolE(in)
 		if err != nil {
 			return err
 		}
@@ -184,7 +185,7 @@ func (cli *anyClient) decodeBasic(in interface{}, outVal reflect.Value) error {
 // - Slice: If the slice is of type []uint8å (a byte slice), it converts the byte slice to a string and then uses strconv.ParseInt to convert the string to an int64. Otherwise, it returns an error.
 //
 // If the input is of any other type, the function returns an error.
-func toInt64E(v interface{}, op Options) (int64, error) {
+func toInt64E(v interface{}) (int64, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return 0, nil
@@ -192,12 +193,21 @@ func toInt64E(v interface{}, op Options) (int64, error) {
 
 	switch outVal := reflect.ValueOf(v); outVal.Kind() {
 	case reflect.String:
+		if i, err := strconv.Atoi(outVal.String()); err == nil {
+			return int64(i), nil
+		}
 		return strconv.ParseInt(outVal.String(), 10, 64)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return outVal.Int(), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		if outVal.Uint() > math.MaxInt64 {
+			return 0, errors.Errorf(ErrUnableConvertInt64, v)
+		}
 		return int64(outVal.Uint()), nil
 	case reflect.Float32, reflect.Float64:
+		if f := outVal.Float(); f > math.MaxInt64 {
+			return 0, errors.Errorf(ErrUnableConvertInt64, v)
+		}
 		return int64(outVal.Float()), nil
 	case reflect.Bool:
 		if outVal.Bool() {
@@ -205,38 +215,49 @@ func toInt64E(v interface{}, op Options) (int64, error) {
 		}
 		return 0, nil
 	case reflect.Struct:
-		switch v.(type) {
-		case time.Time:
-			return v.(time.Time).Unix(), nil
-		default:
-			return 0, errors.Errorf(ErrUnableConvertInt64, v)
+		if t, ok := v.(time.Time); ok {
+			return t.Unix(), nil
 		}
+		return 0, errors.Errorf(ErrUnableConvertInt64, v)
 	case reflect.Slice:
-		switch v.(type) {
-		case []uint8:
-			return strconv.ParseInt(string(v.([]uint8)), 10, 64)
-		default:
-			return 0, errors.Errorf(ErrUnableConvertInt64, v)
+		if b, ok := v.([]uint8); ok {
+			if len(b) == 0 {
+				return 0, nil
+			}
+			return strconv.ParseInt(string(b), 10, 64)
 		}
+		return 0, errors.Errorf(ErrUnableConvertInt64, v)
 	default:
 		return 0, errors.Errorf(ErrUnableConvertInt64, v)
 	}
 }
 
 // toUint64E converts an interface to an uint64 type.
-func toUint64E(v interface{}, op Options) (uint64, error) {
+func toUint64E(v interface{}) (uint64, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return 0, nil
 	}
 	switch outVal := reflect.ValueOf(v); outVal.Kind() {
 	case reflect.String:
+		if i, err := strconv.ParseInt(outVal.String(), 10, 64); err == nil {
+			if i < 0 {
+				return 0, errors.Errorf(ErrUnableConvertInt64, v)
+			}
+			return uint64(i), nil
+		}
 		return strconv.ParseUint(outVal.String(), 10, 64)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		if outVal.Int() < 0 {
+			return 0, errors.Errorf(ErrUnableConvertInt64, v)
+		}
 		return uint64(outVal.Int()), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return outVal.Uint(), nil
 	case reflect.Float32, reflect.Float64:
+		if f := outVal.Float(); f < 0 {
+			return 0, errors.Errorf(ErrUnableConvertInt64, v)
+		}
 		return uint64(outVal.Float()), nil
 	case reflect.Bool:
 		if outVal.Bool() {
@@ -244,27 +265,27 @@ func toUint64E(v interface{}, op Options) (uint64, error) {
 		}
 		return 0, nil
 	case reflect.Slice:
-		switch v.(type) {
-		case []uint8:
-			return strconv.ParseUint(string(v.([]uint8)), 10, 64)
-		default:
-			return 0, errors.Errorf(ErrUnableConvertUint64, v)
+		if b, ok := v.([]uint8); ok {
+			if len(b) == 0 {
+				return 0, nil
+			}
+			return strconv.ParseUint(string(b), 10, 64)
 		}
+		return 0, errors.Errorf(ErrUnableConvertUint64, v)
 	default:
 		return 0, errors.Errorf(ErrUnableConvertUint64, v)
 	}
 }
 
 // toFloat64E converts an interface to a float64 type.
-func toFloat64E(v interface{}, op Options) (float64, error) {
+func toFloat64E(v interface{}) (float64, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return 0, nil
 	}
 	switch outVal := reflect.ValueOf(v); outVal.Kind() {
 	case reflect.String:
-		d, err := strconv.ParseFloat(outVal.String(), 64)
-		return d, err
+		return strconv.ParseFloat(outVal.String(), 64)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return float64(outVal.Int()), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
@@ -277,12 +298,10 @@ func toFloat64E(v interface{}, op Options) (float64, error) {
 		}
 		return 0, nil
 	case reflect.Slice:
-		switch v.(type) {
-		case []uint8:
-			return strconv.ParseFloat(string(v.([]uint8)), 64)
-		default:
-			return 0, errors.Errorf(ErrUnableConvertFloat64, v)
+		if byteSlice, ok := v.([]uint8); ok {
+			return strconv.ParseFloat(string(byteSlice), 64)
 		}
+		return 0, errors.Errorf(ErrUnableConvertFloat64, v)
 	default:
 		return 0, errors.Errorf(ErrUnableConvertFloat64, v)
 	}
@@ -305,35 +324,31 @@ func toStringE(v interface{}, op Options) (string, error) {
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return strconv.FormatUint(outVal.Uint(), 10), nil
 	case reflect.Float32, reflect.Float64:
-		return strconv.FormatFloat(outVal.Float(), 'g', -1, 64), nil
+		return strconv.FormatFloat(outVal.Float(), 'f', -1, 64), nil
 	case reflect.Bool:
 		return strconv.FormatBool(v.(bool)), nil
 	case reflect.Struct:
-		switch v.(type) {
-		case time.Time:
-			return v.(time.Time).Format(op.timeFormat), nil
-		default:
-			b, err := sonic.Marshal(v)
-			return string(b), err
+		if t, ok := v.(time.Time); ok {
+			return t.Format(op.timeFormat), nil
 		}
+		b, err := sonic.Marshal(v)
+		return string(b), err
 	case reflect.Map:
 		b, err := sonic.Marshal(v)
 		return string(b), err
 	case reflect.Slice, reflect.Array:
-		switch v.(type) {
-		case []uint8:
-			return string(v.([]uint8)), nil
-		default:
-			b, err := sonic.Marshal(v)
-			return string(b), err
+		if b, ok := v.([]byte); ok {
+			return string(b), nil
 		}
+		b, err := sonic.Marshal(v)
+		return string(b), err
 	default:
 		return "", errors.Errorf(ErrUnableConvertString, v)
 	}
 }
 
 // toBoolE converts an interface to a bool type.
-func toBoolE(v interface{}, op Options) (bool, error) {
+func toBoolE(v interface{}) (bool, error) {
 	v = Indirect(v)
 	if CheckInIsNil(v) {
 		return false, nil
@@ -350,12 +365,10 @@ func toBoolE(v interface{}, op Options) (bool, error) {
 	case reflect.Bool:
 		return outVal.Bool(), nil
 	case reflect.Slice:
-		switch v.(type) {
-		case []uint8:
-			return strconv.ParseBool(string(v.([]uint8)))
-		default:
-			return false, errors.Errorf(ErrUnableConvertBool, v)
+		if byteSlice, ok := v.([]uint8); ok {
+			return strconv.ParseBool(string(byteSlice))
 		}
+		return false, errors.Errorf(ErrUnableConvertFloat64, v)
 	default:
 		return false, errors.Errorf(ErrUnableConvertBool, v)
 	}

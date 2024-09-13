@@ -5,16 +5,13 @@ import (
 	"strings"
 )
 
-// check in is nil
+// CheckInIsNil checks if the input is nil or if it's a nil pointer.
 func CheckInIsNil(in interface{}) bool {
-	var inVal reflect.Value
-	if in != nil {
-		inVal = reflect.ValueOf(in)
-		if inVal.Kind() == reflect.Ptr && inVal.IsNil() {
-			in = nil
-		}
+	if in == nil {
+		return true
 	}
-	return in == nil
+	val := reflect.ValueOf(in)
+	return val.Kind() == reflect.Ptr && val.IsNil()
 }
 
 // GetFieldNameByTag returns the field name by tag.

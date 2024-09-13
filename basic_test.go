@@ -3,6 +3,7 @@ package goany
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"math"
 	"testing"
 	"time"
 )
@@ -36,6 +37,11 @@ func TestToInt64E(t *testing.T) {
 		v, err := ToInt64E(int64(123))
 		assert.NoError(t, err)
 		assert.Equal(t, int64(123), v)
+	})
+
+	t.Run("Test with large uint64", func(t *testing.T) {
+		_, err := ToInt64E(uint64(math.MaxUint64))
+		assert.Error(t, err)
 	})
 
 	t.Run("Test with string", func(t *testing.T) {
@@ -97,6 +103,12 @@ func TestToInt64E(t *testing.T) {
 }
 
 func TestToUint64E(t *testing.T) {
+	t.Run("Test with nil", func(t *testing.T) {
+		v, err := ToUint64E(nil)
+		assert.NoError(t, err)
+		assert.Equal(t, uint64(0), v)
+	})
+
 	t.Run("Test with byte", func(t *testing.T) {
 		v, err := ToUint64E([]byte("14"))
 		assert.NoError(t, err)
@@ -107,6 +119,11 @@ func TestToUint64E(t *testing.T) {
 		v, err := ToUint64E(123)
 		assert.NoError(t, err)
 		assert.Equal(t, uint64(123), v)
+	})
+
+	t.Run("Test with negative int", func(t *testing.T) {
+		_, err := ToUint64E(-123)
+		assert.Error(t, err)
 	})
 
 	t.Run("Test with int64", func(t *testing.T) {
